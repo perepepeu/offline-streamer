@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}{{ pl.title }} — Offline Streamer{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>📂 {{ pl.title }}</h1>
+  <p>{{ pl.channel or 'Canal desconhecido' }} · {{ pl.video_count }} vídeos</p>
+  {% if pl.videos %}
+    <a href="/watch/{{ pl.videos[0].id }}" class="btn-primary">▶ Assistir tudo</a>
+  {% endif %}
+</div>
+
+<div class="video-grid">
+  {% for item in pl.videos %}
+  <div class="video-card">
+    <a href="/watch/{{ item.id }}" class="thumb-link">
+      <div class="thumb">
+        {% if item.thumbnail %}
+          <img src="/thumb/{{ item.id }}" alt="" loading="lazy">
+        {% else %}
+          <div class="no-thumb">🎬</div>
+        {% endif %}
+        {% if item.duration_string %}
+          <span class="duration">{{ item.duration_string }}</span>
+        {% endif %}
+        {% if item.playlist_index %}
+          <span class="pl-index">#{{ item.playlist_index }}</span>
+        {% endif %}
+      </div>
+    </a>
+    <div class="video-body">
+      <a href="/watch/{{ item.id }}" class="video-title">{{ item.title }}</a>
+      <div class="video-meta">{{ item.channel or '' }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

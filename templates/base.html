@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Offline Streamer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="logo">🎬 Offline Streamer</a>
+    <form class="search-bar" action="/" method="get">
+      <input name="q" placeholder="Buscar vídeos..." value="{{ request.args.get('q', '') }}">
+      <button type="submit">🔍</button>
+    </form>
+    <div class="nav-links">
+      <a href="/">Início</a>
+      <a href="/history">Histórico</a>
+      <a href="/export?fmt=json">Exportar</a>
+      <a href="/settings">⚙️</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

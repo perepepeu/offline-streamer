@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Início — Offline Streamer{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>Offline Streamer</h1>
+  <p>Seu YouTube offline. Baixe, organize e assista — sem internet.</p>
+</div>
+
+<div class="main-grid">
+  <!-- Download sidebar -->
+  <aside class="sidebar">
+    <div class="card">
+      <h2>Novo download</h2>
+      <form method="post" action="/download">
+        <label>URL do vídeo ou playlist</label>
+        <input name="url" placeholder="https://..." required>
+        <div class="spacer"></div>
+        <label>Qualidade</label>
+        <select name="quality">
+          <option value="best" {% if cfg.default_quality=='best' %}selected{% endif %}>Melhor disponível</option>
+          <option value="720" {% if cfg.default_quality=='720' %}selected{% endif %}>Máx 720p</option>
+          <option value="480" {% if cfg.default_quality=='480' %}selected{% endif %}>Máx 480p</option>
+          <option value="360" {% if cfg.default_quality=='360' %}selected{% endif %}>Máx 360p</option>
+          <option value="audio" {% if cfg.default_quality=='audio' %}selected{% endif %}>Somente áudio</option>
+        </select>
+        <div class="spacer"></div>
+        <button type="submit">⬇️ Baixar</button>
+      </form>
+    </div>
+
+    {% if all_tags %}
+    <div class="card" style="margin-top:16px">
+      <h3>🏷️ Filtrar por tag</h3>
+      <div class="tag-list">
+        <a href="/" class="tag {% if not tag_filter %}active{% endif %}">Todos</a>
+        {% for tag in all_tags %}
+          <a href="/?tag={{ tag }}" class="tag {% if tag_filter == tag %}active{% endif %}">{{ tag }}</a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="card" style="margin-top:16px">
+      <h3>Exportar biblioteca</h3>
+      <div style="display:flex;gap:8px;">
+        <a class="btn-export" href="/export?fmt=json">JSON</a>
+        <a class="btn-export" href="/export?fmt=csv">CSV</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main>
+    {% if playlists %}
+    <section>
+      <h2>📂 Playlists</h2>
+      <div class="playlist-shelf">
+        {% for pl in playlists %}
+        <a href="/playlist/{{ pl.id }}" class="playlist-card">
+          <div class="pl-thumb">
+            {% if pl.thumbnail %}
+              <img src="/thumb/{{ pl.videos[0].id }}" alt="">
+            {% else %}
+              <div class="no-thumb">🎵</div>
+            {% endif %}
+            <span class="pl-count">{{ pl.video_count }} vídeos</span>
+          </div>
+          <div class="pl-info">
+            <div class="pl-title">{{ pl.title }}</div>
+            <div class="pl-channel">{{ pl.channel or 'Canal desconhecido' }}</div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section>
+      <h2>🎬 Vídeos{% if q %} — "{{ q }}"{% endif %}</h2>
+      {% if videos %}
+      <div class="video-grid">
+        {% for item in videos %}
+        <div class="video-card" data-id="{{ item.id }}">
+          <a href="/watch/{{ item.id }}" class="thumb-link">
+            <div class="thumb">
+              {% if item.thumbnail %}
+                <img src="/thumb/{{ item.id }}" alt="thumbnail" loading="lazy">
+              {% else %}
+                <div class="no-thumb">🎬</div>
+              {% endif %}
+              {% if item.duration_string %}
+                <span class="duration">{{ item.duration_string }}</span>
+              {% endif %}
+              {% if item.id in history_ids %}
+                <span class="watched-badge">✓</span>
+              {% endif %}
+            </div>
+          </a>
+          <div class="video-body">
+            <a href="/watch/{{ item.id }}" class="video-title">{{ item.title }}</a>
+            <div class="video-meta">{{ item.channel or 'Canal desconhecido' }}</div>
+            {% if item.view_count %}
+              <div class="video-meta">{{ "{:,}".format(item.view_count) }} views</div>
+            {% endif %}
+            {% if item.tags %}
+              <div class="tag-list small">
+                {% for tag in item.tags %}
+                  <a href="/?tag={{ tag }}" class="tag">{{ tag }}</a>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="card-actions">
+              <button class="fav-btn {% if item.is_favorite %}active{% endif %}" data-id="{{ item.id }}"
+                title="Favoritar">{% if item.is_favorite %}★{% else %}☆{% endif %}</button>
+              <a href="/file/{{ item.id }}" title="Baixar arquivo" class="btn-icon">⬇</a>
+              <button class="tag-toggle-btn btn-icon" data-id="{{ item.id }}" title="Tags">🏷️</button>
+              <form method="post" action="/delete/{{ item.id }}" onsubmit="return confirm('Remover este vídeo?')" style="display:inline">
+                <button type="submit" class="btn-icon danger" title="Remover">🗑️</button>
+              </form>
+            </div>
+            <div class="tag-editor" id="te-{{ item.id }}" style="display:none">
+              <form method="post" action="/tag/{{ item.id }}" class="tag-form">
+                <input name="tags" value="{{ item.tags|join(', ') }}" placeholder="tag1, tag2...">
+                <button type="submit">Salvar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card empty-state">
+        <p>Nenhum vídeo encontrado{% if q %} para "{{ q }}"{% endif %}.</p>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</div>
+{% endblock %}

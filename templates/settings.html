@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Configurações — Offline Streamer{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>⚙️ Configurações</h1>
+</div>
+<div class="card" style="max-width:540px">
+  <form method="post" action="/settings">
+    <label>Pasta de downloads</label>
+    <input name="downloads_dir" value="{{ cfg.downloads_dir }}">
+    <div class="spacer"></div>
+
+    <label>Qualidade padrão</label>
+    <select name="default_quality">
+      <option value="best" {% if cfg.default_quality=='best' %}selected{% endif %}>Melhor disponível</option>
+      <option value="720" {% if cfg.default_quality=='720' %}selected{% endif %}>Máx 720p</option>
+      <option value="480" {% if cfg.default_quality=='480' %}selected{% endif %}>Máx 480p</option>
+      <option value="360" {% if cfg.default_quality=='360' %}selected{% endif %}>Máx 360p</option>
+      <option value="audio" {% if cfg.default_quality=='audio' %}selected{% endif %}>Somente áudio</option>
+    </select>
+    <div class="spacer"></div>
+
+    <label class="checkbox-label">
+      <input type="checkbox" name="autoplay" {% if cfg.autoplay %}checked{% endif %}> Autoplay (próximo vídeo automático)
+    </label>
+    <div class="spacer"></div>
+
+    <button type="submit">Salvar configurações</button>
+  </form>
+</div>
+{% endblock %}

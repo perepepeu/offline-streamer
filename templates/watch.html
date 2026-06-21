@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ current.title }} — Offline Streamer{% endblock %}
+{% block content %}
+<div class="player-layout">
+  <div class="player-main">
+    <div class="video-wrapper">
+      <video id="mainPlayer" controls preload="metadata"
+        src="/stream/{{ current.id }}"
+        {% if cfg.autoplay %}autoplay{% endif %}>
+      </video>
+    </div>
+
+    <div class="video-info-block">
+      <h1 class="vw-title">{{ current.title }}</h1>
+      <div class="vw-meta">
+        <span>{{ current.channel or 'Canal desconhecido' }}</span>
+        {% if current.view_count %}
+          <span>· {{ "{:,}".format(current.view_count) }} views</span>
+        {% endif %}
+        {% if current.upload_date %}
+          <span>· {{ current.upload_date[:4] }}-{{ current.upload_date[4:6] }}-{{ current.upload_date[6:] }}</span>
+        {% endif %}
+      </div>
+
+      <div class="vw-actions">
+        <button class="fav-btn {% if current.is_favorite %}active{% endif %}" data-id="{{ current.id }}"
+          id="watchFavBtn">{% if current.is_favorite %}★ Favoritado{% else %}☆ Favoritar{% endif %}</button>
+        <a href="/file/{{ current.id }}" class="btn-secondary">⬇ Baixar arquivo</a>
+        {% if prev_video %}
+          <a href="/watch/{{ prev_video.id }}" class="btn-secondary">⏮ Anterior</a>
+        {% endif %}
+        {% if next_video %}
+          <a href="/watch/{{ next_video.id }}" id="nextBtn" class="btn-secondary">Próximo ⏭</a>
+        {% endif %}
+      </div>
+
+      {% if current.description %}
+      <details class="description">
+        <summary>Descrição</summary>
+        <p>{{ current.description[:1500] }}{% if current.description|length > 1500 %}…{% endif %}</p>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="queue-panel">
+    {% if pl_title %}
+      <div class="queue-header">📂 {{ pl_title }}</div>
+    {% else %}
+      <div class="queue-header">🎬 Fila de reprodução</div>
+    {% endif %}
+    <div class="queue-list">
+      {% for item in queue %}
+      <a href="/watch/{{ item.id }}" class="queue-item {% if item.id == current.id %}playing{% endif %}">
+        <div class="queue-thumb">
+          {% if item.thumbnail %}
+            <img src="/thumb/{{ item.id }}" alt="" loading="lazy">
+          {% else %}
+            <div class="no-thumb small">🎬</div>
+          {% endif %}
+          {% if item.id == current.id %}
+            <span class="playing-indicator">▶</span>
+          {% endif %}
+        </div>
+        <div class="queue-info">
+          <div class="queue-title">{{ item.title }}</div>
+          <div class="queue-channel">{{ item.channel or '' }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </aside>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const autoplay = {{ 'true' if cfg.autoplay else 'false' }};
+  {% if next_video %}
+  const nextUrl = "/watch/{{ next_video.id }}";
+  {% else %}
+  const nextUrl = null;
+  {% endif %}
+
+  const player = document.getElementById('mainPlayer');
+  if (player && autoplay && nextUrl) {
+    player.addEventListener('ended', () => { window.location.href = nextUrl; });
+  }
+</script>
+{% endblock %}

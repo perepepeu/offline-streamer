@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Histórico — Offline Streamer{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>🕓 Histórico de reprodução</h1>
+</div>
+{% if items %}
+<div class="video-grid">
+  {% for item in items %}
+  <div class="video-card">
+    <a href="/watch/{{ item.id }}" class="thumb-link">
+      <div class="thumb">
+        {% if item.thumbnail %}
+          <img src="/thumb/{{ item.id }}" alt="" loading="lazy">
+        {% else %}
+          <div class="no-thumb">🎬</div>
+        {% endif %}
+        {% if item.duration_string %}
+          <span class="duration">{{ item.duration_string }}</span>
+        {% endif %}
+      </div>
+    </a>
+    <div class="video-body">
+      <a href="/watch/{{ item.id }}" class="video-title">{{ item.title }}</a>
+      <div class="video-meta">{{ item.channel or '' }}</div>
+      <div class="video-meta">Assistido em {{ item.watched_at[:16].replace('T', ' ') }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card"><p>Nenhum histórico ainda.</p></div>
+{% endif %}
+{% endblock %}
